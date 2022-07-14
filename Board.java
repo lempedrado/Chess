@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
@@ -25,7 +26,13 @@ public class Board extends JFrame
     protected JPanel operations;
 
     /** An array of JPanels to represent the chess board */
-    protected JPanel[][] board = new JPanel[9][9];
+    protected Square[][] board = new Square[9][9];
+
+    /** Tracks if a square has already been selected to move a piece */
+    protected boolean squareSelected = false;
+
+    /** The square selected to move a Piece from */
+    protected Square selectedSquare = null;
 
     public static void main(String args[])
     {
@@ -35,7 +42,7 @@ public class Board extends JFrame
     public Board()
     {
         //set size and location of JFrame
-        setSize(950, 700);
+        setSize(1000, 700);
         setLocation(100, 100);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -53,8 +60,12 @@ public class Board extends JFrame
         content.setLayout(new GridLayout(1, 2));
         chessBoard = new JPanel();
         operations = new JPanel();
+        chessBoard.setBackground(Color.black);
+        operations.setBackground(Color.gray);
         content.add(chessBoard);
         content.add(operations);
+        chessBoard.setSize(700, 700);
+        operations.setSize(300, 700);
 
         //9 * 9 for a-h and 1-8 labels and then 8*8 board
         chessBoard.setLayout(new GridLayout(9, 9));
@@ -76,29 +87,34 @@ public class Board extends JFrame
             for(int j = 0; j < 9; j++)
             {
                 //Add the JPanel to an array to reference the objects
-                board[i][j] = new JPanel();
+                board[i][j] = new Square();
                 chessBoard.add(board[i][j]);
 
                 //color board
                 //top left corner is color of current player's turn
                 if((i % 2 == 1 && j % 2 == 0) || (i % 2 == 0 && j % 2 == 1))
-                    board[i][j].setBackground(Color.darkGray);
+                {
+                    board[i][j].background(Color.darkGray);
+                    board[i][j].addMouseListener(new MoveHandler(this));
+                }
                 else
-                    board[i][j].setBackground(Color.white);
-
+                {
+                    board[i][j].background(Color.white);
+                    board[i][j].addMouseListener(new MoveHandler(this));
+                }
                 //top row is the number index 0-9
                 if(i > 0 && j == 0)
                 {
                     board[i][j].add(new JLabel(Character.toString('0' + i)));
-                    board[i][j].setBackground(Color.lightGray);
+                    board[i][j].background(Color.lightGray);
                 }
                 //leftmost column is the letter index a-h
                 else if(i == 0 && j > 0)
                 {
                     board[i][j].add(new JLabel(Character.toString('a' + j - 1)));
-                    board[i][j].setBackground(Color.lightGray);
+                    board[i][j].background(Color.lightGray);
                 }
-                board[i][j].setVisible(true);
+                board[i][j].setMinimumSize(new Dimension(100, 100));
             }
         }
         try
@@ -117,7 +133,54 @@ public class Board extends JFrame
      *
      */
     public void fill() throws IOException
-    {
+    {   
+        for(int i = 1; i < 9; i++)
+        {
+            //determine apropriate piece to place in board[1][i] and board[8][i]
+            switch(i)
+            {
+                //place Rooks
+                case 1:
+                case 8:
+                    board[1][i].setPiece(new BRook());
+                    board[8][i].setPiece(new WRook());
+                    break;
 
+                //place Knights
+                case 2:
+                case 7:
+                    board[1][i].setPiece(new BKnight());
+                    board[8][i].setPiece(new WKnight());
+                    break;
+
+                //place Bishops
+                case 3:
+                case 6:
+                    board[1][i].setPiece(new BBishop());
+                    board[8][i].setPiece(new WBishop());
+                    break;
+
+                //place Queens
+                case 4:
+                    board[1][i].setPiece(new BQueen());
+                    board[8][i].setPiece(new WQueen());
+                    break;
+
+                //place Kings
+                case 5:
+                    board[1][i].setPiece(new BKing());
+                    board[8][i].setPiece(new WKing());
+                    break;
+            }
+            //place Pawns
+            board[2][i].setPiece(new BPawn());
+            board[7][i].setPiece(new WPawn());
+        }
+    }
+
+    /** Rotates the board 180 degrees to indicate turn change */
+    public void rotate()
+    {
+        //to be implemented
     }
 }

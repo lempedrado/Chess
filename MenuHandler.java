@@ -14,5 +14,7 @@ public class MenuHandler implements ActionListener
     public void actionPerformed(ActionEvent event)
     {
         String actionName = event.getActionCommand();
+
+        //TODO add confirmation popup and call b.fill()
     }
 }
